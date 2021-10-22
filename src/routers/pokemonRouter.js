@@ -32,6 +32,19 @@ router.put('/catch/:id', async (req, res) => {
         // throw new Error('403', 'Pokemon already caught');
         throw new Error('403');
     }
+});
+
+router.delete('/release/:id', (req, res) => {
+    const requestUsername = req.headers.username;
+    const pokemonId = req.params.id;
+    try {
+        fs.readFileSync(`./users/${requestUsername}/${pokemonId}.json`);
+        fs.unlinkSync(`./users/${requestUsername}/${pokemonId}.json`);
+        res.send("pokemon released");
+    } catch (error) {
+        // throw new Error('403', "pokemon doesn't exist");
+        throw new Error('403')
+    }
 })
 
 
