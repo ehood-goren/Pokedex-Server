@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pokedex = require('pokedex-promise-v2');
 const p = new pokedex;
+const fs = require('fs');
 
 router.get('/query', async (req, res) => {
     const pokemonName = req.query.query;
@@ -14,6 +15,25 @@ router.get('/get/:id', async (req, res) => {
     const pokemon = await constructPokemon(pokemonId);
     res.send(pokemon);
 });
+
+router.put('/catch/:id', async (req, res) => {
+    const pokemonId = req.params.id;
+    const requestUsername = req.headers.username;
+    let fileExists = true;
+    try {
+        fs.readFileSync(`./users/${requestUsername}/${pokemonId}.json`);
+    } catch (error) {
+        fileExists = false;
+        const matchingPokemon = JSON.stringify(await constructPokemon(pokemonId));
+        fs.writeFileSync(`./users/${requestUsername}/${pokemonId}.json`, `${matchingPokemon}`);
+        res.send("pokemon caught");
+    }
+    if(fileExists){
+        // throw new Error('403', 'Pokemon already caught');
+        throw new Error('403');
+    }
+})
+
 
 /**
  * Returns selected attributes of a pokemon
