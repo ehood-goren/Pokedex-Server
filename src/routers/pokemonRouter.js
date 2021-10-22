@@ -45,7 +45,18 @@ router.delete('/release/:id', (req, res) => {
         // throw new Error('403', "pokemon doesn't exist");
         throw new Error('403')
     }
-})
+});
+
+router.get('/', (req, res) => {
+    const requestUsername = req.headers.username;
+    const userPokemonList = fs.readdirSync(`./users/${requestUsername}`);
+    const pokemonInfoList = [];
+    for(let pokemon of userPokemonList){
+        const pokemonInfo = fs.readFileSync(`./users/${requestUsername}/${pokemon}`);
+        pokemonInfoList.push(JSON.parse(pokemonInfo.toString()));
+    }
+    res.send(pokemonInfoList);
+});
 
 
 /**
