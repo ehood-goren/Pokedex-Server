@@ -1,5 +1,7 @@
 const express = require('express');
+const cors = require("cors");
 const app = express();
+app.use(cors());
 const port = 9000;
 const pokemonRouter = require('./src/routers/pokemonRouter');
 const userRouter = require('./src/routers/userRouter');
