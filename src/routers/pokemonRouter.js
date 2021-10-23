@@ -29,8 +29,7 @@ router.put('/catch/:id', async (req, res) => {
         res.send("pokemon caught");
     }
     if(fileExists){
-        // throw new Error('403', 'Pokemon already caught');
-        throw new Error('403');
+        throw new Error('403 catch');
     }
 });
 
@@ -42,8 +41,7 @@ router.delete('/release/:id', (req, res) => {
         fs.unlinkSync(`./users/${requestUsername}/${pokemonId}.json`);
         res.send("pokemon released");
     } catch (error) {
-        // throw new Error('403', "pokemon doesn't exist");
-        throw new Error('403')
+        throw new Error('403 release')
     }
 });
 
