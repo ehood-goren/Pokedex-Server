@@ -16,9 +16,10 @@ app.use(userHandler);
 
 app.use('/pokemon', pokemonRouter);
 app.use('/info', userRouter);
+app.use('/*', (req, res) => {
+    res.status(500).json({ error: "server error" });
+    res.send();
+});
 
 app.use(errorHandler);
-app.use((req, res, next) => {
-    res.status(500).json({ error: "server error" });
-});
 

@@ -5,10 +5,10 @@ function userHandler(req, res, next){
     try {
         fs.readdirSync(`./users/${username}`);
     } catch (error) {
-        throw Error('401');
+        next('401 not exist');
     }
     if(!username){
-        throw Error('401');
+        next('401 empty');
     }
     next();
 }

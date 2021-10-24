@@ -4,36 +4,45 @@ const pokedex = require('pokedex-promise-v2');
 const p = new pokedex;
 const fs = require('fs');
 
-router.get('/query', async (req, res) => {
+router.get('/query', async (req, res, next) => {
     const pokemonName = req.query.query;
-    const pokemon = await constructPokemon(pokemonName);
-    res.send(pokemon);
+    try {
+        const pokemon = await constructPokemon(pokemonName);
+        res.send(pokemon);
+    } catch (error) {
+        next('404');
+    }
 });
 
-router.get('/get/:id', async (req, res) => {
+router.get('/get/:id', async (req, res, next) => {
     const pokemonId = req.params.id;
-    const pokemon = await constructPokemon(pokemonId);
-    res.send(pokemon);
+    try {
+        const pokemon = await constructPokemon(pokemonId);
+        res.send(pokemon);
+    } catch (error) {
+        next('404');
+    }
 });
 
-router.put('/catch/:id', async (req, res) => {
+router.put('/catch/:id', async (req, res, next) => {
     const pokemonId = req.params.id;
     const requestUsername = req.headers.username;
-    let fileExists = true;
     try {
-        fs.readFileSync(`./users/${requestUsername}/${pokemonId}.json`);
+        const userDir = fs.readdirSync(`./users/${requestUsername}`);
+        const pokemonIndex = userDir.indexOf(`${pokemonId}.json`);
+        if(pokemonIndex === -1){
+            const matchingPokemon = JSON.stringify(await constructPokemon(pokemonId));
+            fs.writeFileSync(`./users/${requestUsername}/${pokemonId}.json`, `${matchingPokemon}`);
+        }
+        else{
+            next('403 catch');
+        }
     } catch (error) {
-        fileExists = false;
-        const matchingPokemon = JSON.stringify(await constructPokemon(pokemonId));
-        fs.writeFileSync(`./users/${requestUsername}/${pokemonId}.json`, `${matchingPokemon}`);
-        res.send("pokemon caught");
-    }
-    if(fileExists){
-        throw new Error('403 catch');
+        next('404');
     }
 });
 
-router.delete('/release/:id', (req, res) => {
+router.delete('/release/:id', (req, res, next) => {
     const requestUsername = req.headers.username;
     const pokemonId = req.params.id;
     try {
@@ -41,7 +50,7 @@ router.delete('/release/:id', (req, res) => {
         fs.unlinkSync(`./users/${requestUsername}/${pokemonId}.json`);
         res.send("pokemon released");
     } catch (error) {
-        throw new Error('403 release')
+        next('403 release');
     }
 });
 
@@ -63,7 +72,13 @@ router.get('/', (req, res) => {
  * @returns {Object}
  */
 async function constructPokemon(identifier){
-    const pokemonData = await p.getPokemonByName(identifier);
+    let pokemonData;
+    try{
+        pokemonData = await p.getPokemonByName(identifier);
+    }
+    catch(error){
+        throw Error('404');
+    }
     const pokemon = {
         name: pokemonData.name,
         height: pokemonData.height,
